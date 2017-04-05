@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
+	"net"
 	"net/http"
 	"os"
 	"os/signal"
@@ -11,20 +12,25 @@ import (
 	"sync"
 	"syscall"
 	"time"
+
+	"github.com/spf13/viper"
 )
 
 // Metrics holds our metrics for reporting
 type Metrics struct {
-	Name    string
+	Program string
 	Version string
+	RunTime string
 	Widgets int
 }
 
-var report Metrics
+var report Metrics           // Global Metrics
+var start = time.Now().UTC() // Global Start
 
 // status returns a JSON object with the current
 // metrics, counts, etc. of the running program
 func status(w http.ResponseWriter, req *http.Request) {
+	report.RunTime = fmt.Sprintf("%v", time.Since(start))
 	js, err := json.Marshal(report)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -34,12 +40,54 @@ func status(w http.ResponseWriter, req *http.Request) {
 	w.Write(js)
 }
 
-func main() {
+// GetLocalIP returns the non loopback local IP of the host
+func GetLocalIP() string {
+	addrs, err := net.InterfaceAddrs()
+	if err != nil {
+		return ""
+	}
+	for _, address := range addrs {
+		// check the address type (not a loopback)
+		if ipnet, ok := address.(*net.IPNet); ok && !ipnet.IP.IsLoopback() {
+			if ipnet.IP.To4() != nil {
+				return ipnet.IP.String()
+			}
+		}
+	}
+	return ""
+}
+
+// setupEnvironment parses our config file (using Viper)
+func configure() {
+	viper.AddConfigPath("./config/")
+	viper.SetConfigName("config")
+	viper.SetConfigType("json")
+	err := viper.ReadInConfig()
+	if err != nil { // Handle errors reading the config file
+		panic(fmt.Errorf("Fatal error config file: %s \n", err))
+	}
+}
+
+func housekeeping() {
+	configure()
+	address := GetLocalIP()
 	path := strings.Split(os.Args[0], "/")
-	report.Name = path[len(path)-1]
+	report.Program = path[len(path)-1]
 	report.Version = "0.0.1"
-	log.Printf("%s running. Check status at 'http://localhost:8080/status'", report.Name)
-	start := time.Now()
+	log.Printf("%s running. Get status: 'http://%s%s/status'", report.Program, address, viper.GetString("port"))
+}
+
+func main() {
+	housekeeping()
+
+	// Report metrics (JSON via http) via separate goroutine
+	go func() {
+		http.Handle("/status", http.HandlerFunc(status))
+		err := http.ListenAndServe(viper.GetString("port"), nil)
+		if err != nil {
+			log.Fatal("ListenAndServe error: ", err)
+		}
+	}()
 
 	// When SIGINT or SIGTERM is caught write to the sigs channel
 	// buffer to make sure we catch it
@@ -59,20 +107,10 @@ func main() {
 	closer := make(chan struct{})
 	wg := new(sync.WaitGroup)
 
-	// Report metrics (JSON via http) via separate goroutine
-	go func() {
-		http.Handle("/status", http.HandlerFunc(status))
-		err := http.ListenAndServe(":8080", nil)
-		if err != nil {
-			log.Fatal("ListenAndServe error: ", err)
-		}
-	}()
-
 	// Create main goroutine that does imaginary work
 	wg.Add(1)
 	go func() {
 		defer wg.Done()
-		// log.Println("Starting main work goroutine...")
 
 		// Listen for close message
 		for {
@@ -85,6 +123,7 @@ func main() {
 
 			// Do some hard work here!
 			report.Widgets++
+			log.Printf("another %s...", viper.GetString("widget"))
 			time.Sleep(500 * time.Millisecond)
 		}
 	}()
@@ -95,6 +134,7 @@ func main() {
 	close(closer)
 	// Block until wait group counter gets to zero (main goroutine has stopped)
 	wg.Wait()
-	log.Printf("%s ran for: %s\n", report.Name, time.Since(start))
+	log.Printf("%s ran for: %s\n", report.Program, time.Since(start))
+	log.Printf("%d %ss produced", report.Widgets, viper.GetString("widget"))
 	log.Println("goodbye!")
 }

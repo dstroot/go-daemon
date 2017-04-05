@@ -1,0 +1,4 @@
+package: github.com/dstroot/go-daemon
+import:
+- package: github.com/go-fsnotify/fsnotify
+- package: github.com/spf13/viper

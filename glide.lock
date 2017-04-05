@@ -1,0 +1,47 @@
+hash: 9259c37991c60eb09a2d62b06a6f29b9fc460171d69fa47f00dd6a862854bab4
+updated: 2015-12-28T20:40:18.055124462-08:00
+imports:
+- name: github.com/armon/consul-api
+  version: dcfedd50ed5334f96adee43fc88518a4f095e15c
+  repo: https://github.com/armon/consul-api
+- name: github.com/BurntSushi/toml
+  version: 056c9bc7be7190eaa7715723883caffa5f8fa3e4
+- name: github.com/coreos/go-etcd
+  version: 003851be7bb0694fe3cc457a49529a19388ee7cf
+  repo: https://github.com/coreos/go-etcd
+- name: github.com/go-fsnotify/fsnotify
+  version: 508915b7500b6e42a87132e4afeb4729cebc7cbb
+- name: github.com/hashicorp/hcl
+  version: 197e8d3cf42199cfd53cd775deb37f3637234635
+- name: github.com/kr/pretty
+  version: e6ac2fc51e89a3249e82157fa0bb7a18ef9dd5bb
+- name: github.com/kr/pty
+  version: f7ee69f31298ecbe5d2b349c711e2547a617d398
+  repo: https://github.com/kr/pty
+- name: github.com/kr/text
+  version: bb797dc4fb8320488f47bf11de07a733d7233e1f
+- name: github.com/magiconair/properties
+  version: c81f9d71af8f8cba1466501d30326b99a4e56c19
+- name: github.com/mitchellh/mapstructure
+  version: 281073eb9eb092240d33ef253c404f1cca550309
+- name: github.com/spf13/cast
+  version: ee7b3e0353166ab1f3a605294ac8cd2b77953778
+- name: github.com/spf13/jwalterweatherman
+  version: c2aa07df593850a04644d77bb757d002e517a296
+- name: github.com/spf13/pflag
+  version: 7f60f83a2c81bc3c3c0d5297f61ddfa68da9d3b7
+- name: github.com/spf13/viper
+  version: 110492b3001269a0777997fcbe68a60828fac4cb
+- name: github.com/ugorji/go
+  version: 646ae4a518c1c3be0739df898118d9bccf993858
+  repo: https://github.com/ugorji/go
+- name: github.com/xordataexchange/crypt
+  version: 749e360c8f236773f28fc6d3ddfce4a470795227
+  repo: https://github.com/xordataexchange/crypt
+- name: golang.org/x/crypto
+  version: f18420efc3b4f8e9f3d51f6bd2476e92c46260e9
+- name: gopkg.in/fsnotify.v1
+  version: 508915b7500b6e42a87132e4afeb4729cebc7cbb
+- name: gopkg.in/yaml.v2
+  version: f7716cbe52baa25d2e9b0d0da546fcf909fc16b4
+devImports: []
